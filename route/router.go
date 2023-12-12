@@ -293,7 +293,14 @@ func NewRouter(
 
 	if !usePlatformDefaultInterfaceMonitor {
 		networkMonitor, err := tun.NewNetworkUpdateMonitor(router.logger)
-		if !((err != nil && !needInterfaceMonitor) || errors.Is(err, os.ErrInvalid)) {
+		if err != nil {
+			if needInterfaceMonitor {
+				if err == os.ErrInvalid {
+					return nil, E.New("")
+				}
+			}
+		}
+		if err != nil && needInterfaceMonitor && !errors.Is(err, os.ErrInvalid) {
 			if err != nil {
 				return nil, err
 			}
